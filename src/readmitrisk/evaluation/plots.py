@@ -64,9 +64,7 @@ def plot_calibration(curve: CalibrationCurve, out_path: Path, title: str) -> Pat
     ax.set_ylabel("Observed (Kaplan Meier) risk")
     ax.set_xlim(0, lim)
     ax.set_ylim(0, lim)
-    ax.set_title(
-        f"{title}\ncalibration error (ECE) = {curve.calibration_error:.3f}", fontsize=10.5
-    )
+    ax.set_title(f"{title}\ncalibration error (ECE) = {curve.calibration_error:.3f}", fontsize=10.5)
     ax.legend(loc="upper left", frameon=False)
     ax.grid(alpha=0.25)
     fig.tight_layout()

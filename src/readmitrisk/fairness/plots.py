@@ -35,7 +35,9 @@ def plot_subgroup_cindex(report: FairnessReport, out_path: Path) -> Path:
             )
         ax.axvline(report.overall_c_index, color="black", linestyle="--", linewidth=1)
         gap = "n/a" if attr.c_index_gap is None else f"{attr.c_index_gap:.3f}"
-        title = f"{attr.attribute}  (concordance gap = {gap}{'  (flagged)' if attr.flagged else ''})"
+        title = (
+            f"{attr.attribute}  (concordance gap = {gap}{'  (flagged)' if attr.flagged else ''})"
+        )
         ax.set_title(title, fontsize=10, loc="left")
         ax.set_xlim(0.5, 1.0)
         ax.grid(axis="x", alpha=0.25)
