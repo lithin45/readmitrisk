@@ -39,3 +39,24 @@ def cohort_df(raw_dir: Path):
     from readmitrisk.cohort import build_cohort_from_raw
 
     return build_cohort_from_raw(raw_dir, followup_days=FOLLOWUP_DAYS)
+
+
+@pytest.fixture(scope="session")
+def survival_split(cohort_df):
+    """Group-aware train/test split of the test cohort (Phase 3+)."""
+    from readmitrisk.config import load_config
+    from readmitrisk.models.dataset import split_cohort
+
+    return split_cohort(cohort_df, load_config())
+
+
+@pytest.fixture(scope="session")
+def cox_model(survival_split):
+    """A Cox PH model fit on the training split (Phase 3+)."""
+    from readmitrisk.config import load_config
+    from readmitrisk.models.cox import CoxModel
+
+    cfg = load_config()
+    model = CoxModel(cfg.features, penalizer=0.05)
+    model.fit(survival_split.train)
+    return model
