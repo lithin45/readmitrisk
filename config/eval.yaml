@@ -23,13 +23,16 @@ gate:
     - time_dependent_auc       # cumulative/dynamic AUC at eval time points
 
 metrics:
-  # Time points (days) at which time-dependent AUC, Brier, and calibration are computed.
-  eval_times: [7, 14, 21, 30]
+  # Time points (days) for time-dependent AUC + integrated Brier. Kept strictly below the
+  # 30-day administrative-censoring horizon so the IPCW estimators (which need an
+  # estimable censoring distribution and events beyond each time) stay well-defined.
+  eval_times: [5, 10, 15, 20, 25]
   # Horizon (days) over which the integrated Brier score is integrated.
-  ibs_max_time: 30
+  ibs_max_time: 25
   # Number of bins for the time-dependent calibration curve.
   calibration_bins: 10
-  # Calibration time point (days) for the headline reliability curve.
+  # Calibration time point (days) for the headline reliability curve. KM-based observed
+  # risk handles censoring directly, so the full 30-day horizon is valid here.
   calibration_time: 30
 
 fairness:

@@ -60,3 +60,41 @@ def cox_model(survival_split):
     model = CoxModel(cfg.features, penalizer=0.05)
     model.fit(survival_split.train)
     return model
+
+
+@pytest.fixture(scope="session")
+def rsf_model(survival_split):
+    """A small Random Survival Forest fit on the training split (Phase 4+)."""
+    from readmitrisk.config import load_config
+    from readmitrisk.models.rsf import RSFModel
+
+    cfg = load_config()
+    model = RSFModel(cfg.features, {**cfg.evaluation.rsf, "n_estimators": 80})
+    model.fit(survival_split.train)
+    return model
+
+
+@pytest.fixture(scope="session")
+def eval_result(survival_split, cox_model, rsf_model):
+    """Full evaluation (Cox + RSF, metrics + calibration) on the test population."""
+    from readmitrisk.config import load_config
+    from readmitrisk.evaluation.evaluate import evaluate_models
+    from readmitrisk.evaluation.metrics import harrell_concordance
+    from readmitrisk.models.pipeline import ModelResult, TrainReport
+
+    cfg = load_config()
+    fc = cfg.features
+    results = []
+    for key, model in [("cox", cox_model), ("rsf", rsf_model)]:
+        risk = model.predict_risk(survival_split.test)
+        ci = harrell_concordance(
+            survival_split.test[fc.event_col], survival_split.test[fc.duration_col], risk
+        )
+        results.append(ModelResult(key=key, name=model.name, c_index=ci, model=model))
+    report = TrainReport(
+        results=results,
+        split=survival_split,
+        models={"cox": cox_model, "rsf": rsf_model},
+        config=cfg,
+    )
+    return evaluate_models(report, cfg)

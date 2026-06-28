@@ -71,6 +71,10 @@ addopts = "-ra -q"
 markers = [
     "slow: marks tests that run the full pipeline (deselect with '-m \"not slow\"')",
 ]
+filterwarnings = [
+    # scikit-survival still calls the deprecated numpy.trapz internally.
+    "ignore:`trapz` is deprecated:DeprecationWarning",
+]
 
 [tool.coverage.run]
 source = ["readmitrisk"]
