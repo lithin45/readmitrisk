@@ -75,6 +75,15 @@ def rsf_model(survival_split):
 
 
 @pytest.fixture(scope="session")
+def fairness_report(survival_split, cox_model):
+    """Subgroup fairness audit of the Cox model on the test population (Phase 5+)."""
+    from readmitrisk.config import load_config
+    from readmitrisk.fairness.audit import audit_model
+
+    return audit_model(cox_model, survival_split.test, load_config(), model_name="Cox PH")
+
+
+@pytest.fixture(scope="session")
 def eval_result(survival_split, cox_model, rsf_model):
     """Full evaluation (Cox + RSF, metrics + calibration) on the test population."""
     from readmitrisk.config import load_config
