@@ -190,7 +190,7 @@ def write_reports(result: EvalResult) -> dict:
     (rdir / "metrics.json").write_text(json.dumps(payload, indent=2))
 
     md = [
-        "# ReadmitRisk — evaluation report",
+        "# ReadmitRisk: evaluation report",
         "",
         f"- **Best model:** {best.name} (Harrell C-index **{best.c_index:.4f}**)",
         f"- **Gate:** C-index >= {result.min_c_index:.2f} -> "

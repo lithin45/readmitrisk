@@ -1,7 +1,7 @@
 """Train/test splitting for the survival cohort.
 
 The split is **group-aware** (by ``patient_id``) so the same patient never appears in
-both train and test — without this, multiple index encounters from one patient leak risk
+both train and test, without this, multiple index encounters from one patient leak risk
 across the split and inflate the C-index. It is also stratified on the event indicator so
 the readmission rate is preserved across folds.
 """

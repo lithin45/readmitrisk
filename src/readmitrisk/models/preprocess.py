@@ -1,12 +1,12 @@
 """Feature preprocessing shared by the Cox and RSF models.
 
 Turns the tidy cohort DataFrame into a numeric design matrix:
-  * missing-lab indicators (``{lab}_missing``) — missingness can be informative,
-  * median imputation of numeric features (medians fit on TRAIN only — no leakage),
+  * missing-lab indicators (``{lab}_missing``), missingness can be informative,
+  * median imputation of numeric features (medians fit on TRAIN only, no leakage),
   * one-hot encoding of categoricals (first level dropped),
   * optional standardization of numeric features (on for Cox, off for the scale-free RSF).
 
-Subgroup/protected attributes are deliberately excluded — they are used only by the
+Subgroup/protected attributes are deliberately excluded, they are used only by the
 fairness audit, never as model inputs.
 """
 

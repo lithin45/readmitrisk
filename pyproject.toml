@@ -1,7 +1,7 @@
 [project]
 name = "readmitrisk"
 version = "0.1.0"
-description = "ReadmitRisk — survival analysis of time-to-hospital-readmission with calibration and a fairness audit, on synthetic Synthea EHR data."
+description = "ReadmitRisk: survival analysis of time-to-hospital-readmission with calibration and a fairness audit, on synthetic Synthea EHR data."
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
 license = { text = "Apache-2.0" }

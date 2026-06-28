@@ -1,5 +1,5 @@
 -- =====================================================================================
--- ReadmitRisk — cohort construction (DuckDB)
+-- ReadmitRisk: cohort construction (DuckDB)
 -- =====================================================================================
 -- Builds tidy *time-to-event* records for survival analysis directly from the raw
 -- Synthea-schema EHR tables (patients / encounters / conditions / observations). This is

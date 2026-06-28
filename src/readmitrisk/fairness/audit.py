@@ -1,11 +1,11 @@
-"""Fairness audit — per-subgroup discrimination + calibration, with gap flagging.
+"""Fairness audit, per-subgroup discrimination + calibration, with gap flagging.
 
 A model can be strongly discriminating overall yet perform unevenly across demographic
 subgroups. For each protected attribute (sex, age band, race, ethnicity) we compute, on
 the held-out test set, the within-subgroup Harrell C-index and the within-subgroup
 calibration error at the horizon, then report the *gap* (best minus worst) and flag any
 gap exceeding the configured threshold. Small subgroups are reported but flagged as
-low-confidence, because subgroup metrics on tiny samples are noisy — a caveat, not a pass.
+low-confidence, because subgroup metrics on tiny samples are noisy, a caveat, not a pass.
 """
 
 from __future__ import annotations
@@ -174,8 +174,8 @@ def render_report(report: FairnessReport) -> str:
         lines.append(f"[{attr.attribute}]  C-index gap={cg}  calib gap={kg}{flag}")
         lines.append(f"  {'level':<14}{'n':>6}{'events':>8}{'C-index':>10}{'calib err':>11}  note")
         for s in attr.subgroups:
-            ci = "  —  " if s.c_index is None else f"{s.c_index:.3f}"
-            ce = "  —  " if s.calibration_error is None else f"{s.calibration_error:.3f}"
+            ci = " n/a " if s.c_index is None else f"{s.c_index:.3f}"
+            ce = " n/a " if s.calibration_error is None else f"{s.calibration_error:.3f}"
             note = "low-N/events (caveat)" if s.low_confidence else ""
             lines.append(f"  {s.level:<14}{s.n:>6}{s.n_events:>8}{ci:>10}{ce:>11}  {note}")
         lines.append("")

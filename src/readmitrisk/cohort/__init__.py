@@ -1,4 +1,4 @@
-"""Cohort construction — run the DuckDB clinical SQL and return a tidy cohort.
+"""Cohort construction, run the DuckDB clinical SQL and return a tidy cohort.
 
 The heavy lifting lives in ``sql/cohort.sql`` (index selection, the discharge->next-
 admission clock, right-censoring, comorbidity burden, prior utilization, latest labs).

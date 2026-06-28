@@ -27,7 +27,7 @@ synthea:
   # Release jar to download when building the Synthea image. The Synthea project
   # publishes a fat jar with each release; pin a known-good tag for reproducibility.
   jar_url: "https://github.com/synthetichealth/synthea/releases/download/master-branch-latest/synthea-with-dependencies.jar"
-  # Synthea exporter flags — we only need CSV output for the DuckDB cohort build.
+  # Synthea exporter flags, we only need CSV output for the DuckDB cohort build.
   exporter_flags:
     "exporter.csv.export": "true"
     "exporter.fhir.export": "false"

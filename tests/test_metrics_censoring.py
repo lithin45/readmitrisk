@@ -2,7 +2,7 @@
 
 These tests enforce that:
   1. evaluation uses survival metrics and never plain classification accuracy;
-  2. concordance is computed only over *comparable* (censoring-aware) pairs — proven by
+  2. concordance is computed only over *comparable* (censoring-aware) pairs, proven by
      matching an independent brute-force Harrell concordance, and by showing a naive
      "treat censored as negative" accuracy gives a different, wrong answer.
 """
@@ -25,7 +25,7 @@ def _brute_force_concordance(events, times, risk) -> float:
     """Reference Harrell C-index over comparable pairs (assumes distinct times).
 
     A pair contributes iff the subject with the *smaller* time had an event (otherwise the
-    later subject's outcome is unknown — that is exactly what censoring means).
+    later subject's outcome is unknown, that is exactly what censoring means).
     """
     events = np.asarray(events).astype(int)
     times = np.asarray(times, dtype=float)
@@ -60,7 +60,7 @@ def test_concordance_matches_censoring_aware_bruteforce() -> None:
 
 def test_concordance_ignores_incomparable_censored_pairs() -> None:
     """A censored subject with a short follow-up is NOT comparable to later events, so
-    mis-ranking it must not change the concordance — unlike a naive accuracy."""
+    mis-ranking it must not change the concordance, unlike a naive accuracy."""
     # X censored very early (high risk but unknown outcome); Y and Z are real events.
     events = [0, 1, 1]
     times = [2.0, 5.0, 9.0]

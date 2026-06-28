@@ -4,7 +4,7 @@ Why this exists
 ---------------
 The *primary* data source is the real Synthea generator (run via the Docker one-shot,
 ``make generate``). But Synthea is a ~100&nbsp;MB Java fat-jar that takes minutes to run a
-full population — unacceptable for CI and awkward for a first-clone "it just works"
+full population, unacceptable for CI and awkward for a first-clone "it just works"
 experience. This module produces output with the **exact same CSV column schema** that
 Synthea's CSV exporter emits (``patients``, ``encounters``, ``conditions``,
 ``observations``), so the downstream DuckDB cohort SQL is byte-for-byte the same code
@@ -15,11 +15,11 @@ How the readmission signal is encoded
 Crucially, we do **not** write durations or event labels. We simulate a realistic
 hospitalization *process* per patient. Every patient has at least one (index) inpatient
 admission; each discharge is followed by a near-term readmission with a probability that
-is logistic in a latent per-patient risk (a "mixture / cure" formulation — most
+is logistic in a latent per-patient risk (a "mixture / cure" formulation, most
 discharges are simply not followed by a near-term admission). When a readmission does
 occur, its timing is drawn from a Weibull so events spread across the follow-up window.
 Sicker patients (older, more comorbidities, longer stays, abnormal labs) have higher
-readmission odds. The observable features are correlated with — but a noisy view of —
+readmission odds. The observable features are correlated with, but a noisy view of ,
 that latent risk, with an irreducible unobserved-frailty component that caps the
 achievable C-index at a realistic level (~0.75). The DuckDB SQL then *re-derives* the
 time-to-event records from the raw timestamps, exactly as it would for real Synthea.
@@ -161,7 +161,7 @@ def generate(
     race = rng.choice(RACES, size=n)
     ethnicity = rng.choice(["hispanic", "nonhispanic"], size=n, p=[0.16, 0.84])
 
-    # Unobserved frailty — the irreducible component the model can NEVER see. Its weight
+    # Unobserved frailty, the irreducible component the model can NEVER see. Its weight
     # (NOISE_WEIGHT below) sets the ceiling on the achievable concordance.
     frailty = rng.normal(0, 1, n)
 
@@ -219,7 +219,7 @@ def generate(
     def z(x: np.ndarray) -> np.ndarray:
         return (x - x.mean()) / (x.std() + 1e-9)
 
-    # Observed (model-visible) component — built from standardized observed features.
+    # Observed (model-visible) component, built from standardized observed features.
     obs_lp = (
         0.55 * z(age.astype(float))
         + 0.70 * z(comorbidity_score)
@@ -246,7 +246,7 @@ def generate(
     readmit_prob = 1.0 / (1.0 + np.exp(-(READMIT_LOGIT0 + READMIT_SIGNAL * eta)))
     SHORT_GAP_SHAPE = 1.1  # Weibull shape for time-to-readmission (days)
     # Readmission timing also depends on risk: higher-risk discharges are readmitted
-    # SOONER (shorter scale), which makes survival times — not just event incidence —
+    # SOONER (shorter scale), which makes survival times, not just event incidence ,
     # informative. Kept modest so the honest C-index stays in the realistic 0.74-0.78
     # band rather than the implausibly-easy 0.85+ a strong timing signal would produce.
     timing_coef = float(os.environ.get("READMIT_SIM_TIMING", "0.10"))

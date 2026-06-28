@@ -1,4 +1,4 @@
-"""ReadmitRisk — Streamlit risk-curve demo.
+"""ReadmitRisk: Streamlit risk-curve demo.
 
 Select a synthetic patient and see their predicted readmission survival curve (Cox PH vs
 Random Survival Forest), the SHAP drivers behind the Cox risk score, the model-evaluation
@@ -19,7 +19,7 @@ from readmitrisk.ui import backend
 st.set_page_config(page_title="ReadmitRisk", page_icon="🏥", layout="wide")
 
 
-@st.cache_resource(show_spinner="Loading models + cohort…")
+@st.cache_resource(show_spinner="Loading models + cohort...")
 def _bundle():
     return backend.load_bundle()
 
@@ -110,7 +110,7 @@ def _patient_tab(bundle) -> None:
     c[2].metric("LOS (days)", f"{row['length_of_stay_days']:.0f}")
     c[3].metric("Comorbidities", int(row["n_conditions"]))
     c[4].metric("Prior ED", int(row["n_prior_emergency"]))
-    c[5].metric("HbA1c", f"{row['hba1c']:.1f}" if not np.isnan(row["hba1c"]) else "—")
+    c[5].metric("HbA1c", f"{row['hba1c']:.1f}" if not np.isnan(row["hba1c"]) else "n/a")
 
     left, right = st.columns([3, 2])
     with left:
@@ -131,7 +131,7 @@ def _patient_tab(bundle) -> None:
         st.caption(f"Ground truth for this synthetic patient: {outcome}.")
 
     with right:
-        st.markdown("##### Why? — SHAP drivers (Cox PH)")
+        st.markdown("##### Why this prediction? SHAP drivers (Cox PH)")
         expl = backend.patient_drivers(bundle, enc_id)
         if expl is not None:
             st.plotly_chart(_drivers_figure(expl), use_container_width=True)
@@ -182,7 +182,7 @@ def _evaluation_tab(bundle) -> None:
 
 
 def _fairness_tab(bundle) -> None:
-    st.markdown("##### Fairness audit — per-subgroup C-index & calibration")
+    st.markdown("##### Fairness audit, per-subgroup C-index & calibration")
     fair = bundle.fairness
     if not fair:
         st.info("Run `make fairness` to generate the subgroup audit.")
@@ -199,7 +199,7 @@ def _fairness_tab(bundle) -> None:
         gap = attr["c_index_gap"]
         gap_s = "n/a" if gap is None else f"{gap:.3f}"
         flag = " ⚠️" if attr["flagged"] else ""
-        st.markdown(f"**{attr['attribute']}** — C-index gap: {gap_s}{flag}")
+        st.markdown(f"**{attr['attribute']}**, C-index gap: {gap_s}{flag}")
         st.dataframe(
             [
                 {
@@ -227,13 +227,13 @@ def _fairness_tab(bundle) -> None:
 
 
 def main() -> None:
-    st.title("🏥 ReadmitRisk — time-to-readmission risk explorer")
+    st.title("🏥 ReadmitRisk: time-to-readmission risk explorer")
     st.caption(
         "Survival analysis (right-censoring handled), calibrated risk, and a subgroup "
-        "fairness audit — on fully synthetic Synthea-schema EHR data."
+        "fairness audit, on fully synthetic Synthea-schema EHR data."
     )
     bundle = _bundle()
-    st.caption(f"Model source: {bundle.source} · {len(bundle.test):,} test index encounters.")
+    st.caption(f"Model source: {bundle.source} | {len(bundle.test):,} test index encounters.")
     st.info(
         "Safe, self contained demo on fully synthetic data. There are no real patients, "
         "no external APIs, no keys, and nothing to configure or pay for. Everything you "

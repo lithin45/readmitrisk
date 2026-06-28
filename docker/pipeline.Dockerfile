@@ -19,7 +19,7 @@ RUN apt-get update \
 
 WORKDIR /app
 
-# Dependency layer — cached unless pyproject/uv.lock change.
+# Dependency layer, cached unless pyproject/uv.lock change.
 COPY pyproject.toml uv.lock README.md ./
 RUN uv sync --frozen --no-dev --no-install-project
 
@@ -46,4 +46,4 @@ RUN apt-get update \
 WORKDIR /app
 COPY --from=builder /app /app
 
-CMD ["python", "-c", "print('readmitrisk image ready — supply a command via compose')"]
+CMD ["python", "-c", "print('readmitrisk image ready, supply a command via compose')"]

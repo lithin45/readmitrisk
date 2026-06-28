@@ -1,4 +1,4 @@
-# ReadmitRisk — one-command local stack.
+# ReadmitRisk: one-command local stack.
 #
 #   docker compose up            -> generate (fallback) + run pipeline + serve demo
 #   docker compose --profile synthea up  (or `make up-synthea`)

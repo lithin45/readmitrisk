@@ -37,6 +37,6 @@ jobs:
       - name: Pytest (incl. censoring / survival-metric invariants)
         run: uv run pytest -m "not slow" --maxfail=1
 
-      # Eval gate on the small committed cached sample — NOT a full population regen.
+      # Eval gate on the small committed cached sample, NOT a full population regen.
       - name: Eval gate (C-index threshold) on cached sample
         run: uv run readmitrisk eval --sample

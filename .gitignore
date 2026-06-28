@@ -1,4 +1,4 @@
-# ReadmitRisk — generated artifacts are reproducible; do not commit them.
+# ReadmitRisk: generated artifacts are reproducible; do not commit them.
 # Exception: the small cached sample under data/sample/ IS committed (see below).
 
 # Generated data (raw Synthea output + derived cohort + model artifacts)

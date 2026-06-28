@@ -1,4 +1,4 @@
-# ReadmitRisk — developer & reproducibility entry points.
+# ReadmitRisk: developer & reproducibility entry points.
 #
 # Local stages run via `uv` (fast, what CI uses). The full containerized stack
 # (Synthea one-shot + pipeline + Streamlit demo) runs via `docker compose`.

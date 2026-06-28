@@ -50,23 +50,23 @@ Honest numbers on a held out test split, grouped by patient so no one appears in
 
 ```mermaid
 flowchart LR
-    subgraph G["1 · Generate"]
+    subgraph G["1. Generate"]
         S["Synthea (Docker one shot)<br/>or deterministic fallback<br/>(identical CSV schema)"]
     end
-    subgraph C["2 · Cohort (DuckDB SQL)"]
+    subgraph C["2. Cohort (DuckDB SQL)"]
         D["index inpatient stays<br/>duration = discharge to next admit<br/>event vs. censored<br/>plus features and subgroups"]
     end
-    subgraph M["3 to 4 · Models"]
+    subgraph M["3 to 4. Models"]
         COX["Cox PH (lifelines)"]
         RSF["Random Survival Forest<br/>(scikit-survival)"]
     end
-    subgraph E["4 · Evaluation"]
-        EV["Concordance · IPCW<br/>Integrated Brier<br/>Time dependent calibration"]
+    subgraph E["4. Evaluation"]
+        EV["Concordance. IPCW<br/>Integrated Brier<br/>Time dependent calibration"]
     end
-    subgraph F["5 · Fairness"]
+    subgraph F["5. Fairness"]
         FA["per subgroup concordance<br/>plus calibration gaps<br/>flag if gap over 0.05"]
     end
-    subgraph U["6 · Demo"]
+    subgraph U["6. Demo"]
         UI["Streamlit: risk curve<br/>plus SHAP drivers<br/>plus fairness report"]
     end
 

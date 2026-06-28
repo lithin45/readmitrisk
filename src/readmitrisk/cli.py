@@ -32,7 +32,7 @@ def cmd_generate(args: argparse.Namespace) -> int:
     from .paths import get_paths
 
     cfg = load_config()
-    _print_header("ReadmitRisk — synthetic data generation")
+    _print_header("ReadmitRisk: synthetic data generation")
     print(
         f"backend={args.backend or cfg.generation.backend}  "
         f"population={cfg.generation.population}  seed={cfg.generation.seed}"
@@ -56,7 +56,7 @@ def cmd_smoke(_args: argparse.Namespace) -> int:
     from .duckdb_util import raw_counts
     from .paths import get_paths
 
-    _print_header("ReadmitRisk — DuckDB smoke test")
+    _print_header("ReadmitRisk: DuckDB smoke test")
     counts = raw_counts(get_paths().raw)
     for k, v in counts.items():
         print(f"  {k:<22} {v:>10,}")
@@ -66,7 +66,7 @@ def cmd_smoke(_args: argparse.Namespace) -> int:
 def cmd_cohort(args: argparse.Namespace) -> int:
     from .cohort import build_cohort
 
-    _print_header("ReadmitRisk — cohort construction (DuckDB SQL)")
+    _print_header("ReadmitRisk: cohort construction (DuckDB SQL)")
     result = build_cohort(write=True, use_sample=args.sample)
     print(result.describe())
     return 0
@@ -75,7 +75,7 @@ def cmd_cohort(args: argparse.Namespace) -> int:
 def cmd_train(args: argparse.Namespace) -> int:
     from .models.pipeline import train_models
 
-    _print_header("ReadmitRisk — model training (Cox PH + RSF)")
+    _print_header("ReadmitRisk: model training (Cox PH + RSF)")
     report = train_models(use_sample=args.sample)
     print(report.summary())
     return 0
@@ -84,7 +84,7 @@ def cmd_train(args: argparse.Namespace) -> int:
 def cmd_eval(args: argparse.Namespace) -> int:
     from .evaluation.evaluate import run_eval
 
-    _print_header("ReadmitRisk — evaluation (survival metrics + gate)")
+    _print_header("ReadmitRisk: evaluation (survival metrics + gate)")
     passed = run_eval(use_sample=args.sample)
     return 0 if passed else 1
 
@@ -92,7 +92,7 @@ def cmd_eval(args: argparse.Namespace) -> int:
 def cmd_fairness(args: argparse.Namespace) -> int:
     from .fairness.audit import run_fairness
 
-    _print_header("ReadmitRisk — fairness audit (subgroup C-index + calibration)")
+    _print_header("ReadmitRisk: fairness audit (subgroup C-index + calibration)")
     run_fairness(use_sample=args.sample)
     return 0
 

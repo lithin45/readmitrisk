@@ -19,7 +19,7 @@ def test_cox_global_importance_covers_features(survival_split, cox_model) -> Non
 
 
 def test_cox_shap_additivity(survival_split, cox_model) -> None:
-    """SHAP for a linear model is exact: base + sum(contributions) == coef·x."""
+    """SHAP for a linear model is exact: base + sum(contributions) == coef*x."""
     exp = CoxExplainer(cox_model, survival_split.train)
     row = survival_split.test.iloc[[3]]
     pe = exp.explain_patient(row)

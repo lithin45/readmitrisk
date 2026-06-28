@@ -1,4 +1,4 @@
-"""ReadmitRisk — survival analysis of time-to-hospital-readmission.
+"""ReadmitRisk: survival analysis of time-to-hospital-readmission.
 
 A production-grade, locally-runnable system that models time-to-readmission with
 right-censoring handled correctly, calibrated risk estimates, and a fairness audit

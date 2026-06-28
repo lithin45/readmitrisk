@@ -1,7 +1,7 @@
 """Explainability: SHAP for the Cox model + model-agnostic permutation importance.
 
 The Cox partial log-hazard is linear in the (standardized) design matrix, so SHAP values
-are exact and cheap via ``shap.LinearExplainer`` — they decompose each patient's risk
+are exact and cheap via ``shap.LinearExplainer``, they decompose each patient's risk
 score into additive per-feature contributions. For the non-linear Random Survival Forest
 (which SHAP's TreeExplainer does not support for scikit-survival forests) we fall back to
 permutation importance measured as the drop in C-index when a feature is shuffled.

@@ -112,7 +112,7 @@ def load_bundle(prefer_sample: bool = False) -> DemoBundle:
 
 def patient_label(row: pd.Series, fc) -> str:
     return (
-        f"{row['index_encounter_id'][:8]} · {row['sex']}, {row['age_at_index']:.0f}y, "
+        f"{row['index_encounter_id'][:8]} | {row['sex']}, {row['age_at_index']:.0f}y, "
         f"{int(row['n_conditions'])} cond, LOS {row['length_of_stay_days']:.0f}d"
     )
 

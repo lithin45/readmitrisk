@@ -1,9 +1,9 @@
-"""Survival metrics — the ONLY metrics this project evaluates with.
+"""Survival metrics, the ONLY metrics this project evaluates with.
 
 Discrimination uses concordance (Harrell's + IPCW); overall fit uses the integrated
 Brier score; time-resolved discrimination uses cumulative/dynamic AUC. Plain
 classification accuracy is intentionally absent and is rejected by
-:func:`assert_survival_metrics` — treating censored patients as negatives would be wrong.
+:func:`assert_survival_metrics`, treating censored patients as negatives would be wrong.
 """
 
 from __future__ import annotations
@@ -33,7 +33,7 @@ def assert_survival_metrics(metric_names: list[str], required: list[str]) -> Non
     if forbidden:
         raise ValueError(
             f"Forbidden (non-survival) metrics in evaluation: {sorted(forbidden)}. "
-            "Readmission is right-censored — classification accuracy is invalid."
+            "Readmission is right-censored, classification accuracy is invalid."
         )
     missing = set(required) - present
     if missing:

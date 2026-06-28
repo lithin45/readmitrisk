@@ -3,7 +3,7 @@
 # The DuckDB cohort SQL (sql/cohort.sql) emits exactly these columns. The modeling
 # layer reads this file to know which columns are numeric features, which are
 # categorical (one-hot encoded), and which are *subgroup attributes* used ONLY for
-# the fairness audit (never as model inputs — that would bake protected attributes
+# the fairness audit (never as model inputs, that would bake protected attributes
 # directly into the risk score).
 
 target:
@@ -31,7 +31,7 @@ numeric_features:
 categorical_features:
   - sex                    # M / F
 
-# Protected / sensitive attributes — used ONLY for the fairness audit, never as
+# Protected / sensitive attributes, used ONLY for the fairness audit, never as
 # model inputs. Each entry maps to a column produced by the cohort SQL.
 subgroup_attributes:
   - name: sex
