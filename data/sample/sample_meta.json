@@ -1,0 +1,17 @@
+{
+  "population": 1500,
+  "seed": 7,
+  "followup_days": 30,
+  "n_index_encounters": 1972,
+  "n_events": 424,
+  "event_rate": 0.215,
+  "generator": "fallback",
+  "raw_counts": {
+    "n_patients": 1500,
+    "n_encounters": 8383,
+    "n_inpatient": 1974,
+    "n_conditions": 2679,
+    "n_observations": 6606,
+    "n_deaths": 53
+  }
+}

@@ -9,9 +9,11 @@ data/reports/
 *.duckdb
 *.duckdb.wal
 
-# Keep the committed cached sample used by tests + CI
+# Keep the committed cached sample used by tests + CI (the cohort parquet + meta only;
+# the bulky raw CSVs are regenerated deterministically by `make sample`).
 !data/sample/
 !data/sample/**
+data/sample/raw/
 
 # Python
 __pycache__/

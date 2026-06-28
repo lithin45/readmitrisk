@@ -30,6 +30,7 @@ configured master seed, so a fixed (population, seed) reproduces identical outpu
 
 from __future__ import annotations
 
+import os
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -230,18 +231,26 @@ def generate(
         + 0.40 * z(los_factor)
     )
     obs_lp = z(obs_lp)  # standardize the aggregate observed score
-    NOISE_WEIGHT = 0.75  # frailty weight -> caps achievable C-index near ~0.75
+    # NOISE_WEIGHT (frailty) and READMIT_SIGNAL together set the achievable C-index. They
+    # are env-overridable so the signal-to-noise can be tuned without code changes; the
+    # committed defaults land the honest test C-index at a realistic ~0.78.
+    NOISE_WEIGHT = float(os.environ.get("READMIT_SIM_NOISE", "1.10"))
     eta = obs_lp + NOISE_WEIGHT * frailty
 
     # Per-discharge readmission probability (logistic in the latent risk). This is a
     # "mixture / cure" formulation: most discharges are NOT followed by a near-term
     # admission, while a risk-dependent fraction are. It keeps admissions-per-patient
-    # clinically realistic (~1-2) while producing a ~15% 30-day readmission rate.
-    READMIT_LOGIT0 = -1.5  # baseline log-odds of a near-term readmission
-    READMIT_SIGNAL = 0.95  # how strongly latent risk shifts the readmission odds
+    # clinically realistic (~1-2) while producing a ~15-20% 30-day readmission rate.
+    READMIT_LOGIT0 = float(os.environ.get("READMIT_SIM_LOGIT0", "-3.05"))  # baseline log-odds
+    READMIT_SIGNAL = float(os.environ.get("READMIT_SIM_SIGNAL", "1.35"))
     readmit_prob = 1.0 / (1.0 + np.exp(-(READMIT_LOGIT0 + READMIT_SIGNAL * eta)))
     SHORT_GAP_SHAPE = 1.1  # Weibull shape for time-to-readmission (days)
-    SHORT_GAP_SCALE = 22.0  # most near-term readmissions fall within ~60 days
+    # Readmission timing also depends on risk: higher-risk discharges are readmitted
+    # SOONER (shorter scale), which makes survival times — not just event incidence —
+    # informative. Kept modest so the honest C-index stays in the realistic 0.74-0.78
+    # band rather than the implausibly-easy 0.85+ a strong timing signal would produce.
+    timing_coef = float(os.environ.get("READMIT_SIM_TIMING", "0.10"))
+    short_gap_scale = 22.0 * np.exp(-timing_coef * eta)
 
     # Mortality: small per-patient probability over the window, higher for frail patients.
     death_prob = np.clip(0.02 + 0.03 * np.clip(eta, 0, None), 0, 0.25)
@@ -322,7 +331,7 @@ def generate(
             if death_offset is not None and discharge >= death_offset:
                 break
             if rng.random() < readmit_prob[i]:
-                gap = float(rng.weibull(SHORT_GAP_SHAPE) * SHORT_GAP_SCALE)
+                gap = float(rng.weibull(SHORT_GAP_SHAPE) * short_gap_scale[i])
                 admit = discharge + max(1, int(round(gap)))
                 chain += 1
             else:
