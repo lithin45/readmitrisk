@@ -1,0 +1,68 @@
+# ReadmitRisk — one-command local stack.
+#
+#   docker compose up            -> generate (fallback) + run pipeline + serve demo
+#   docker compose --profile synthea up  (or `make up-synthea`)
+#                                -> generate with the REAL Synthea container instead
+#
+# All three services share a single named volume so the generated data + model
+# artifacts produced by the pipeline are visible to the Streamlit app.
+name: readmitrisk
+
+services:
+  # Optional real-Synthea generator (only runs under the `synthea` profile).
+  synthea:
+    profiles: ["synthea"]
+    build:
+      context: .
+      dockerfile: docker/synthea.Dockerfile
+    environment:
+      READMIT_POPULATION: ${READMIT_POPULATION:-4000}
+      READMIT_SEED: ${READMIT_SEED:-42}
+      READMIT_DATA_DIR: /app/data
+    volumes:
+      - readmit-data:/app/data
+
+  # Batch pipeline: generate (skips if data already present) -> cohort -> train -> eval -> fairness.
+  pipeline:
+    build:
+      context: .
+      dockerfile: docker/pipeline.Dockerfile
+    depends_on:
+      synthea:
+        condition: service_completed_successfully
+        required: false
+    environment:
+      READMIT_DATA_DIR: /app/data
+      READMIT_POPULATION: ${READMIT_POPULATION:-4000}
+      READMIT_SEED: ${READMIT_SEED:-42}
+      READMIT_GENERATOR: ${READMIT_GENERATOR:-auto}
+    volumes:
+      - readmit-data:/app/data
+    command:
+      - bash
+      - -lc
+      - "readmitrisk generate && readmitrisk cohort && readmitrisk train && readmitrisk eval && readmitrisk fairness"
+
+  # Streamlit risk-curve demo; waits for the pipeline to finish producing artifacts.
+  app:
+    build:
+      context: .
+      dockerfile: docker/pipeline.Dockerfile
+    depends_on:
+      pipeline:
+        condition: service_completed_successfully
+    environment:
+      READMIT_DATA_DIR: /app/data
+    volumes:
+      - readmit-data:/app/data
+    ports:
+      - "${READMIT_STREAMLIT_PORT:-8501}:8501"
+    command:
+      - streamlit
+      - run
+      - src/readmitrisk/ui/app.py
+      - --server.port=8501
+      - --server.address=0.0.0.0
+
+volumes:
+  readmit-data:

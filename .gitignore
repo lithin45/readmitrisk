@@ -1,0 +1,44 @@
+# ReadmitRisk — generated artifacts are reproducible; do not commit them.
+# Exception: the small cached sample under data/sample/ IS committed (see below).
+
+# Generated data (raw Synthea output + derived cohort + model artifacts)
+data/raw/
+data/cohort/
+data/artifacts/
+data/reports/
+*.duckdb
+*.duckdb.wal
+
+# Keep the committed cached sample used by tests + CI
+!data/sample/
+!data/sample/**
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.uv/
+
+# uv
+# (uv.lock IS committed for reproducibility)
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Env
+.env

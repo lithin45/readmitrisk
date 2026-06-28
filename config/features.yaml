@@ -1,0 +1,59 @@
+# Feature + subgroup specification for the time-to-event cohort.
+#
+# The DuckDB cohort SQL (sql/cohort.sql) emits exactly these columns. The modeling
+# layer reads this file to know which columns are numeric features, which are
+# categorical (one-hot encoded), and which are *subgroup attributes* used ONLY for
+# the fairness audit (never as model inputs — that would bake protected attributes
+# directly into the risk score).
+
+target:
+  duration_col: duration_days        # time from index discharge to readmission or censor
+  event_col: event_observed          # 1 = readmitted within follow-up, 0 = right-censored
+  followup_days: 30                  # event horizon; override via READMIT_FOLLOWUP_DAYS
+
+id_col: patient_id
+
+# Numeric features fed to the survival models (standardized where appropriate).
+numeric_features:
+  - age_at_index           # years at index discharge
+  - length_of_stay_days    # index inpatient length of stay
+  - n_conditions           # active comorbidity count at index
+  - n_prior_encounters     # prior utilization (all encounters in 365d lookback)
+  - n_prior_inpatient      # prior inpatient admissions in lookback
+  - n_prior_emergency      # prior ED visits in lookback
+  - comorbidity_score      # weighted comorbidity burden (Charlson-style proxy)
+  - bmi                    # latest BMI observation (median-imputed if missing)
+  - systolic_bp            # latest systolic BP (median-imputed if missing)
+  - hba1c                  # latest HbA1c (median-imputed if missing)
+  - glucose                # latest glucose (median-imputed if missing)
+
+# Categorical features fed to the models (one-hot encoded; first level dropped).
+categorical_features:
+  - sex                    # M / F
+
+# Protected / sensitive attributes — used ONLY for the fairness audit, never as
+# model inputs. Each entry maps to a column produced by the cohort SQL.
+subgroup_attributes:
+  - name: sex
+    column: sex
+  - name: age_band
+    column: age_band        # <40 / 40-64 / 65-79 / 80+
+  - name: race
+    column: race
+  - name: ethnicity
+    column: ethnicity
+
+# Lab/observation LOINC codes pulled around the index encounter (latest value within
+# the lookback window). Missing values are median-imputed with a companion *_missing
+# indicator handled in the modeling layer.
+observations:
+  bmi: { loinc: "39156-5", unit: "kg/m2" }
+  systolic_bp: { loinc: "8480-6", unit: "mm[Hg]" }
+  hba1c: { loinc: "4548-4", unit: "%" }
+  glucose: { loinc: "2339-0", unit: "mg/dL" }
+
+preprocessing:
+  # Median impute missing numeric features; standardize before Cox (RSF is scale-free).
+  numeric_impute: median
+  standardize_for_cox: true
+  lookback_days: 365         # window for prior-utilization + latest-observation features

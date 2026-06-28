@@ -1,0 +1,53 @@
+# Evaluation + fairness gate configuration.
+#
+# `make eval` enforces these as HARD gates and exits non-zero on failure. The
+# censoring/metric-correctness invariant is also enforced here: evaluation must use
+# survival metrics (C-index, integrated Brier, time-dependent calibration) and never
+# plain classification accuracy.
+
+split:
+  test_size: 0.25          # held-out test fraction; override via READMIT_TEST_SIZE
+  seed: 42                 # split seed (kept separate so data regen != split change)
+  stratify_on_event: true  # preserve event/censor ratio across train/test
+
+gate:
+  # Honest discrimination target. Readmission is genuinely hard; we report the real
+  # number and fail the gate (non-zero exit) if the test C-index is below this.
+  min_c_index: 0.70
+
+  # Require survival metrics to be present. If any are missing the eval is invalid
+  # and the gate fails (prevents silently substituting classification accuracy).
+  require_survival_metrics:
+    - concordance_index        # Harrell's C-index
+    - integrated_brier_score   # IBS over the evaluation horizon
+    - time_dependent_auc       # cumulative/dynamic AUC at eval time points
+
+metrics:
+  # Time points (days) at which time-dependent AUC, Brier, and calibration are computed.
+  eval_times: [7, 14, 21, 30]
+  # Horizon (days) over which the integrated Brier score is integrated.
+  ibs_max_time: 30
+  # Number of bins for the time-dependent calibration curve.
+  calibration_bins: 10
+  # Calibration time point (days) for the headline reliability curve.
+  calibration_time: 30
+
+fairness:
+  # Flag a subgroup when its metric gap vs. the best-performing subgroup exceeds this.
+  max_subgroup_gap: 0.05
+  # Subgroups smaller than this are reported but flagged as low-confidence (caveat).
+  min_subgroup_n: 50
+  # Metrics computed per subgroup.
+  subgroup_metrics:
+    - concordance_index
+    - calibration_error    # mean abs. gap between predicted and observed risk at horizon
+
+models:
+  cox:
+    penalizer: 0.05        # ridge penalty for numerical stability of the Cox fit
+    l1_ratio: 0.0
+  rsf:
+    n_estimators: 200
+    min_samples_leaf: 15
+    max_features: sqrt
+    seed: 42

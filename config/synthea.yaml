@@ -1,0 +1,46 @@
+# Synthetic population configuration.
+#
+# These settings drive BOTH the real Synthea generator (make generate with Docker)
+# and the deterministic Synthea-schema fallback generator. Keeping them in one place
+# guarantees the population size and seed are identical across backends, which is what
+# makes the pipeline reproducible.
+
+generator:
+  # "synthea" | "fallback" | "auto" (auto = Synthea if available else fallback).
+  # Overridable via the READMIT_GENERATOR env var.
+  backend: auto
+
+population:
+  # Number of synthetic patients. Override via READMIT_POPULATION.
+  size: 4000
+  # Master seed. Synthea is seeded with -s/-cs <seed>; the fallback uses the same value.
+  seed: 42
+  # Geography passed to Synthea (purely cosmetic for the synthetic identities).
+  state: Massachusetts
+  city: Bedford
+  # Fixed reference "today" so durations/censoring are deterministic across runs.
+  reference_date: "2020-01-01"
+
+synthea:
+  # Where the Synthea jar lives inside the generation container.
+  jar_path: /opt/synthea/synthea-with-dependencies.jar
+  # Release jar to download when building the Synthea image. The Synthea project
+  # publishes a fat jar with each release; pin a known-good tag for reproducibility.
+  jar_url: "https://github.com/synthetichealth/synthea/releases/download/master-branch-latest/synthea-with-dependencies.jar"
+  # Synthea exporter flags — we only need CSV output for the DuckDB cohort build.
+  exporter_flags:
+    "exporter.csv.export": "true"
+    "exporter.fhir.export": "false"
+    "exporter.hospital.fhir.export": "false"
+    "exporter.practitioner.fhir.export": "false"
+    "generate.only_alive_patients": "false"
+
+output:
+  # Raw generator output (Synthea CSV schema) is written here.
+  raw_subdir: raw
+  # Tables we consume downstream (Synthea CSV exporter file names).
+  tables:
+    - patients
+    - encounters
+    - conditions
+    - observations
