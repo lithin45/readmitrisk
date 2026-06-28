@@ -74,6 +74,8 @@ markers = [
 filterwarnings = [
     # scikit-survival still calls the deprecated numpy.trapz internally.
     "ignore:`trapz` is deprecated:DeprecationWarning",
+    # shap's colormap setup uses soon-to-be-deprecated matplotlib colormap setters.
+    "ignore:The set_(bad|over|under) function will be deprecated:PendingDeprecationWarning",
 ]
 
 [tool.coverage.run]

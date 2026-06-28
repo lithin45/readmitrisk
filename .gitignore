@@ -36,11 +36,12 @@ venv/
 htmlcov/
 coverage.xml
 
-# OS / editor
+# OS / editor / tooling
 .DS_Store
 .idea/
 .vscode/
 *.swp
+.claude/
 
 # Env
 .env
