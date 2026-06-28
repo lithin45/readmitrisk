@@ -24,6 +24,15 @@ def _bundle():
     return backend.load_bundle()
 
 
+def _report_image(name: str) -> str | None:
+    """Find a report plot on disk, falling back to the committed docs/assets copies."""
+    for base in (get_paths().reports, get_paths().root / "docs" / "assets"):
+        p = base / name
+        if p.exists():
+            return str(p)
+    return None
+
+
 def _risk_curve_figure(curves: dict[str, np.ndarray]) -> go.Figure:
     times = curves["times"]
     fig = go.Figure()
@@ -157,7 +166,6 @@ def _evaluation_tab(bundle) -> None:
     else:
         st.info("Run `make eval` to generate the evaluation report.")
 
-    rdir = get_paths().reports
     cols = st.columns(3)
     for col, (img, cap) in zip(
         cols,
@@ -168,9 +176,9 @@ def _evaluation_tab(bundle) -> None:
         ],
         strict=False,
     ):
-        p = rdir / img
-        if p.exists():
-            col.image(str(p), caption=cap, use_container_width=True)
+        path = _report_image(img)
+        if path:
+            col.image(path, caption=cap, use_container_width=True)
 
 
 def _fairness_tab(bundle) -> None:
@@ -213,9 +221,9 @@ def _fairness_tab(bundle) -> None:
         "Subgroup C-index standard error ~ 0.5/√events; low-N/events subgroups are shown for "
         "transparency but excluded from gap flagging."
     )
-    fp = get_paths().reports / "fairness_cindex.png"
-    if fp.exists():
-        st.image(str(fp), use_container_width=True)
+    fp = _report_image("fairness_cindex.png")
+    if fp:
+        st.image(fp, use_container_width=True)
 
 
 def main() -> None:
@@ -226,6 +234,12 @@ def main() -> None:
     )
     bundle = _bundle()
     st.caption(f"Model source: {bundle.source} · {len(bundle.test):,} test index encounters.")
+    st.info(
+        "Safe, self contained demo on fully synthetic data. There are no real patients, "
+        "no external APIs, no keys, and nothing to configure or pay for. Everything you "
+        "see is generated and computed locally.",
+        icon="🔒",
+    )
 
     tab1, tab2, tab3 = st.tabs(["🧑‍⚕️ Patient risk", "📊 Model evaluation", "⚖️ Fairness audit"])
     with tab1:

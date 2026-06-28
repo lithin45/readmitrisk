@@ -35,40 +35,78 @@ def _read_json(path) -> dict | None:
     return json.loads(path.read_text()) if path.exists() else None
 
 
+def _compute_reports(models, train, test, config, report=None) -> tuple[dict, dict]:
+    """Compute the evaluation + fairness payloads on the fly (so a fresh deploy's
+    Evaluation and Fairness tabs are populated without any prior `make eval`)."""
+    from ..evaluation.evaluate import evaluate_models, metrics_payload
+    from ..evaluation.metrics import harrell_concordance
+    from ..fairness.audit import audit_model, fairness_payload
+    from ..models.dataset import SurvivalSplit
+    from ..models.pipeline import ModelResult, TrainReport
+
+    fc = config.features
+    if report is None:
+        split = SurvivalSplit(train=train, test=test, feature_cfg=fc)
+        results = [
+            ModelResult(
+                key=key,
+                name=model.name,
+                c_index=harrell_concordance(
+                    test[fc.event_col], test[fc.duration_col], model.predict_risk(test)
+                ),
+                model=model,
+            )
+            for key, model in models.items()
+        ]
+        report = TrainReport(results=results, split=split, models=models, config=config)
+
+    eval_result = evaluate_models(report, config)
+    best = max(report.results, key=lambda r: r.c_index)
+    fair = audit_model(best.model, report.split.test, config, model_name=best.name)
+    return metrics_payload(eval_result), fairness_payload(fair)
+
+
 def load_bundle(prefer_sample: bool = False) -> DemoBundle:
     """Load models + cohort for the demo.
 
     Uses persisted full-data artifacts when present; otherwise trains on the cached
-    sample so the demo runs with zero prior setup.
+    sample so the demo runs with zero prior setup. The evaluation + fairness reports are
+    read from disk if available, else computed on the fly from the loaded models.
     """
     from ..models.pipeline import load_artifacts, train_models
 
     paths = get_paths()
     art = None if prefer_sample else load_artifacts()
+    report = None
     if art is not None:
-        models, train, test, source = (
-            art["models"],
-            art["train"],
-            art["test"],
-            "full-data artifacts",
-        )
-        config = load_config()
+        models, train, test = art["models"], art["train"], art["test"]
+        config, source = load_config(), "full-data artifacts"
     else:
         report = train_models(use_sample=True, persist=False)
         models, train, test = report.models, report.split.train, report.split.test
         config, source = report.config, "cached sample (trained on the fly)"
 
+    train = train.reset_index(drop=True)
+    test = test.reset_index(drop=True)
     cox = models.get("cox")
     cox_explainer = CoxExplainer(cox, train) if cox is not None else None
+
+    metrics = _read_json(paths.reports / "metrics.json")
+    fairness = _read_json(paths.reports / "fairness.json")
+    if metrics is None or fairness is None:
+        computed_metrics, computed_fair = _compute_reports(models, train, test, config, report)
+        metrics = metrics or computed_metrics
+        fairness = fairness or computed_fair
+
     return DemoBundle(
         models=models,
-        train=train.reset_index(drop=True),
-        test=test.reset_index(drop=True),
+        train=train,
+        test=test,
         config=config,
         cox_explainer=cox_explainer,
         source=source,
-        fairness=_read_json(paths.reports / "fairness.json"),
-        metrics=_read_json(paths.reports / "metrics.json"),
+        fairness=fairness,
+        metrics=metrics,
     )
 
 

@@ -123,6 +123,37 @@ def render_metrics_table(result: EvalResult) -> str:
     return "\n".join(lines)
 
 
+def metrics_payload(result: EvalResult) -> dict:
+    """Serialize an evaluation result to the dict the report JSON + UI consume."""
+    best = result.best()
+    split = result.report.split
+    fc = result.config.features
+    return {
+        "passed": result.passed,
+        "min_c_index": result.min_c_index,
+        "best_model": best.name,
+        "best_c_index": best.c_index,
+        "n_train": len(split.train),
+        "n_test": len(split.test),
+        "test_event_rate": float(split.test[fc.event_col].mean()),
+        "eval_times": [float(t) for t in result.eval_times],
+        "calibration_time": result.calibration_time,
+        "models": [
+            {
+                "name": m.name,
+                "concordance_index": m.c_index,
+                "ipcw_concordance_index": m.ipcw_c_index,
+                "integrated_brier_score": m.integrated_brier_score,
+                "time_dependent_auc_mean": m.mean_time_auc,
+                "time_dependent_auc": m.time_auc,
+                "calibration_error": m.calibration_error,
+                "calibration_curve": m.calibration.to_frame().to_dict(orient="list"),
+            }
+            for m in result.metrics
+        ],
+    }
+
+
 def write_reports(result: EvalResult) -> dict:
     from .plots import plot_calibration, plot_cindex_comparison, plot_example_survival_curves
 
@@ -155,30 +186,7 @@ def write_reports(result: EvalResult) -> dict:
         result.min_c_index,
     )
 
-    payload = {
-        "passed": result.passed,
-        "min_c_index": result.min_c_index,
-        "best_model": best.name,
-        "best_c_index": best.c_index,
-        "n_train": len(split.train),
-        "n_test": len(split.test),
-        "test_event_rate": float(split.test[fc.event_col].mean()),
-        "eval_times": [float(t) for t in result.eval_times],
-        "calibration_time": result.calibration_time,
-        "models": [
-            {
-                "name": m.name,
-                "concordance_index": m.c_index,
-                "ipcw_concordance_index": m.ipcw_c_index,
-                "integrated_brier_score": m.integrated_brier_score,
-                "time_dependent_auc_mean": m.mean_time_auc,
-                "time_dependent_auc": m.time_auc,
-                "calibration_error": m.calibration_error,
-                "calibration_curve": m.calibration.to_frame().to_dict(orient="list"),
-            }
-            for m in result.metrics
-        ],
-    }
+    payload = metrics_payload(result)
     (rdir / "metrics.json").write_text(json.dumps(payload, indent=2))
 
     md = [

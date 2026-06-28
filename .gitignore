@@ -41,7 +41,6 @@ coverage.xml
 .idea/
 .vscode/
 *.swp
-.claude/
 
 # Env
 .env

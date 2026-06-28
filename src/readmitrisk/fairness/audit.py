@@ -195,12 +195,9 @@ def render_report(report: FairnessReport) -> str:
     return "\n".join(lines)
 
 
-def write_reports(report: FairnessReport) -> dict:
-    from .plots import plot_subgroup_cindex
-
-    paths = get_paths().ensure()
-    rdir = paths.reports
-    payload = {
+def fairness_payload(report: FairnessReport) -> dict:
+    """Serialize a fairness report to the dict the JSON + UI consume."""
+    return {
         "model": report.model_name,
         "overall_c_index": report.overall_c_index,
         "threshold": report.threshold,
@@ -218,6 +215,14 @@ def write_reports(report: FairnessReport) -> dict:
             for a in report.attributes
         ],
     }
+
+
+def write_reports(report: FairnessReport) -> dict:
+    from .plots import plot_subgroup_cindex
+
+    paths = get_paths().ensure()
+    rdir = paths.reports
+    payload = fairness_payload(report)
     (rdir / "fairness.json").write_text(json.dumps(payload, indent=2))
     (rdir / "fairness_report.txt").write_text(render_report(report))
     png = plot_subgroup_cindex(report, rdir / "fairness_cindex.png")
