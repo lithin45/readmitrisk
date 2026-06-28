@@ -172,12 +172,12 @@ def write_reports(result: EvalResult) -> dict:
         surv,
         risk,
         rdir / "survival_curves.png",
-        f"Individual readmission survival curves — {best.name}",
+        f"Readmission survival curves for {best.name}",
     )
     cal_png = plot_calibration(
         best.calibration,
         rdir / "calibration.png",
-        f"Time-dependent calibration @ day {result.calibration_time:.0f} — {best.name}",
+        f"Day {result.calibration_time:.0f} calibration for {best.name}",
     )
     cmp_png = plot_cindex_comparison(
         [m.name for m in result.metrics],

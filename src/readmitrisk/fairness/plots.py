@@ -35,16 +35,17 @@ def plot_subgroup_cindex(report: FairnessReport, out_path: Path) -> Path:
             )
         ax.axvline(report.overall_c_index, color="black", linestyle="--", linewidth=1)
         gap = "n/a" if attr.c_index_gap is None else f"{attr.c_index_gap:.3f}"
-        title = f"{attr.attribute}  (C-index gap = {gap}{'  ⚠' if attr.flagged else ''})"
+        title = f"{attr.attribute}  (concordance gap = {gap}{'  (flagged)' if attr.flagged else ''})"
         ax.set_title(title, fontsize=10, loc="left")
         ax.set_xlim(0.5, 1.0)
         ax.grid(axis="x", alpha=0.25)
 
     axes[-1].set_xlabel(
-        f"Within-subgroup Harrell C-index  (dashed = overall {report.overall_c_index:.3f}; "
-        "hatched/grey = low-N caveat)"
+        f"Within subgroup concordance (dashed = overall {report.overall_c_index:.3f}, "
+        "grey = small sample)",
+        fontsize=9,
     )
-    fig.suptitle(f"Fairness audit — {report.model_name}", fontsize=12)
+    fig.suptitle(f"Fairness audit for {report.model_name}", fontsize=12)
     fig.tight_layout(rect=(0, 0, 1, 0.98))
     fig.savefig(out_path, dpi=130)
     plt.close(fig)

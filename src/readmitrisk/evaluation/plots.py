@@ -61,10 +61,12 @@ def plot_calibration(curve: CalibrationCurve, out_path: Path, title: str) -> Pat
         label="model (KM observed)",
     )
     ax.set_xlabel(f"Predicted readmission risk by day {curve.time:.0f}")
-    ax.set_ylabel("Observed (Kaplan-Meier) risk")
+    ax.set_ylabel("Observed (Kaplan Meier) risk")
     ax.set_xlim(0, lim)
     ax.set_ylim(0, lim)
-    ax.set_title(f"{title}\ncalibration error (ECE) = {curve.calibration_error:.3f}")
+    ax.set_title(
+        f"{title}\ncalibration error (ECE) = {curve.calibration_error:.3f}", fontsize=10.5
+    )
     ax.legend(loc="upper left", frameon=False)
     ax.grid(alpha=0.25)
     fig.tight_layout()
@@ -81,7 +83,7 @@ def plot_cindex_comparison(
     bars = ax.barh(names, cindices, color=colors)
     ax.axvline(threshold, color="black", linestyle="--", linewidth=1, label=f"gate {threshold:.2f}")
     ax.set_xlim(0.5, 1.0)
-    ax.set_xlabel("Harrell C-index (test)")
+    ax.set_xlabel("Harrell concordance (test)")
     for bar, c in zip(bars, cindices, strict=False):
         ax.text(
             bar.get_width() + 0.005, bar.get_y() + bar.get_height() / 2, f"{c:.3f}", va="center"
