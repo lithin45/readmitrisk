@@ -40,7 +40,7 @@ services:
       - readmit-data:/app/data
     command:
       - bash
-      - -lc
+      - -c
       - "readmitrisk generate && readmitrisk cohort && readmitrisk train && readmitrisk eval && readmitrisk fairness"
 
   # Streamlit risk-curve demo; waits for the pipeline to finish producing artifacts.
